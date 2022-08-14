@@ -1,0 +1,64 @@
+package logger
+
+import (
+	"strings"
+
+	"github.com/go-git/go-git/v5"
+)
+
+type Logger struct {
+	Level int
+	Tag   string
+}
+
+// 4 log.Debug("Useful debugging information.")
+// 3 log.Info("Something noteworthy happened!")
+// 2 log.Warn("You should probably take a look at this.")
+// 1 log.Error("Something failed but I'm not quitting.")
+// 1 log.Fatal("Bye.") -- Calls os.Exit(1) after logging
+// 1 log.Panic("I'm bailing.") -- Calls panic() after logging
+
+func New() Logger {
+	level := 3
+
+	appPath := ""
+	r, err := git.PlainOpen(appPath)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	hashCommit, err := r.Head()
+	if err != nil {
+		log.Fatal("head", err)
+	}
+	tag := strings.Split(hashCommit.String(), " ")
+
+	return Logger{
+		Level: level,
+		Tag:   tag[0],
+	}
+}
+
+func (l Logger) Error(message string, err error) {
+
+	log.WithFields(log.Fields{
+		"err": err,
+		"tag": l.Tag,
+	}).Error(message)
+}
+
+func (l Logger) Debug(message string) {
+	log.WithFields(log.Fields{
+		"animal": "walrus",
+		"number": 1,
+		"size":   10,
+	}).Info("A walrus appears")
+	log.WithFields(log.Fields{
+		"animal": "walrus",
+		"number": 1,
+		"size":   10,
+	}).Error("A walrus appears")
+	log.WithFields(log.Fields{
+		"tag": l.Tag,
+	}).Debug(message)
+}
